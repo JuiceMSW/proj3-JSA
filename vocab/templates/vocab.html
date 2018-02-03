@@ -80,34 +80,54 @@
 <br />
 <div class="row">
   <div class="col-xs-6 text-center">
-  <form id="entry" method="POST" action="/_check">
+  <form id="entry">
     <label for="attempt">Word:</label>
     <input id="attempt" name="attempt" type="text" width="15"
       autocomplete="off"  autofocus />
-    <input type="submit" name="try" />
   </form>
 </div></div>
 
+<script>
+
+$("#entry").submit(function(event) {
+  event.preventDefault();
+});
+
+$("#attempt").keyup(function(event) {
+  var txt = $("#attempt").val();
+  
+  $.getJSON("/_check", {text: txt}, function(data) {
+    var result = data.result.match;
+    if (result === "") {
+      //Does nothing, just needed a return value
+    } else if (result === "success") {
+      //Found on stackoverflow
+      window.location.href = "/success";
+    } else if (result === "notinbag") {
+      $("#attempt").val(txt.substring(0, txt.length - 1))
+    } else {
+      $("#results").append(result + " ");
+      $("#attempt").val("");
+    }
+  });
+});
+
+</script>
+
 <br />
 
-{% if session.matches|length is not equalto 0  %}
 <h2>You found </h2>
-<p id="results">
-  {% for match in session.matches %}
-  {{ match }} 
-  {% endfor %}
-</p>
-{% endif %}
+<p id="results"></p>
 
 
-{% with messages = get_flashed_messages() %}
+<!-- {% with messages = get_flashed_messages() %}
   {% if messages %}
-    <!-- Mismatch, already found, etc. "flashed" from Python -->
+    Mismatch, already found, etc. "flashed" from Python
     {% for message in messages %}
       <p class="message">{{ message }}</p>
     {% endfor %}
   {% endif %}
-{% endwith %}
+{% endwith %} -->
 
 
 
